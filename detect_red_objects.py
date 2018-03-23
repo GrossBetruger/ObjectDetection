@@ -1,7 +1,9 @@
 from __future__ import division
+
+import json
+
 import cv2
 import numpy as np
-import pyautogui as ag
 import time
 
 green = (0, 255, 0)
@@ -58,14 +60,6 @@ def circle_contour(image, contour):
     return image_with_ellipse
 
 
-def move_around(point):
-    from random import randint
-    for _ in range(7):
-        point = (point[0]+randint(-5, 5), point[1]+randint(-5, 5))
-        ag.moveTo(*point)
-        time.sleep(.3)
-
-
 def find_red_objects(image):
     #RGB stands for Red Green Blue. Most often, an RGB color is stored 
     #in a structure or unsigned integer with Blue occupying the least 
@@ -115,18 +109,23 @@ def find_red_objects(image):
     mask_clean = cv2.morphologyEx(mask_closed, cv2.MORPH_OPEN, kernel)
 
     contours = find_contours(mask_clean)
-
+    final_result = []
     for con in contours:
         M = cv2.moments(con)
         centroid = (int(M['m10']/M['m00']), int(M['m01']/M['m00']))
         # move_around(centroid)
-        print "CENTROID:", centroid
+        # print "CENTROID:", centroid
         epsilon = 0.1 * cv2.arcLength(con, True)
-        approx = cv2.approxPolyDP(con, epsilon, True)
-        print "SHAPE_APPROXIMATION:"
-        print approx
-        print "CONTOUR_AREA:", cv2.contourArea(con)
-        print "###"
+        approx = cv2.approxPolyDP(con, epsilon, True).tolist()
+        # print "SHAPE_APPROXIMATION:"
+        # print approx
+        contour_area = cv2.contourArea(con)
+        # print "CONTOUR_AREA:", contour_area
+        # print "###"
+        jsn_res = {"centroid": centroid, "shape": approx, "contour_area": contour_area}
+        print json.dumps(jsn_res)
+        final_result.append(jsn_res)
+    # print json.dumps(final_result)
     return
 
 
