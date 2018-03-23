@@ -1,18 +1,18 @@
 from __future__ import division
 import cv2
-from matplotlib import pyplot as plt
 import numpy as np
 import pyautogui as ag
 import time
 
 green = (0, 255, 0)
 
-def show(image):
-    # Figure size in inches
-    plt.figure(figsize=(10, 10))
+# def show(image):
+#     # Figure size in inches
+#     plt.figure(figsize=(10, 10))
+#
+#     # Show image, with nearest neighbour interpolation
+#     plt.imshow(image, interpolation='nearest')
 
-    # Show image, with nearest neighbour interpolation
-    plt.imshow(image, interpolation='nearest')
 
 def overlay_mask(mask, image):
 	#make the mask rgb
@@ -129,13 +129,6 @@ def find_red_objects(image):
         print "###"
     return
 
-    # code to draw a circle over the found shape (we don't need it for now)
-    overlay = overlay_mask(mask_clean, image)
-    circled = circle_contour(overlay, big_strawberry_contour)
-    show(circled)
-    bgr = cv2.cvtColor(circled, cv2.COLOR_RGB2BGR)
-    
-    return bgr
 
 if __name__ == "__main__":
     import sys
