@@ -39,11 +39,16 @@ fn main() {
 //    enigo.mouse_move_relative(100, 100);
 //    enigo.mouse_up(MouseButton::Left);
 //    enigo.key_sequence("hello world");
+
+    let mut input_file = File::open("out").expect("couldn't find input");
+    let mut input_str = String::new();
+    input_file.read_to_string(& mut input_str);
+    let (x, y) = find_centroid(&input_str);
+
     let mut enigo = Enigo::new();
-    for i in (0..9000){
-        enigo.mouse_move_to(i, i);
-        enigo.mouse_down(MouseButton::Left);
-    }
+    enigo.mouse_move_to(x, y);
+    enigo.mouse_down(MouseButton::Left);
+
 
 }
 
