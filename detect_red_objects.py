@@ -4,7 +4,7 @@ import json
 
 import cv2
 import numpy as np
-import time
+import math
 
 green = (0, 255, 0)
 
@@ -70,7 +70,9 @@ def find_red_objects(image):
     # we'll be manipulating pixels directly
     #most compatible for the transofrmations we're about to do
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
+
+    height, width, channels = image.shape
+
     #eliminate noise from our image. clean. smooth colors without dots
     #Blurs an image using a Gaussian filter. input, kernel size, how much to filter, empty)
     image_blur = cv2.GaussianBlur(image, (7, 7), 0)
@@ -113,6 +115,8 @@ def find_red_objects(image):
     for con in contours:
         M = cv2.moments(con)
         centroid = (int(M['m10']/M['m00']), int(M['m01']/M['m00']))
+        x, y = centroid
+        normalized_centriod = normalize(x, y, width, height)
         # move_around(centroid)
         # print "CENTROID:", centroid
         epsilon = 0.1 * cv2.arcLength(con, True)
@@ -122,19 +126,42 @@ def find_red_objects(image):
         contour_area = cv2.contourArea(con)
         # print "CONTOUR_AREA:", contour_area
         # print "###"
-        jsn_res = {"centroid": centroid, "shape": approx, "contour_area": contour_area}
+        jsn_res = {"centroid": centroid, "normalized_centroid": normalized_centriod,
+                   "shape": approx, "contour_area": contour_area}
         print json.dumps(jsn_res)
         final_result.append(jsn_res)
-    # print json.dumps(final_result)
-    return
 
+    # print json.dumps(final_result)
+    return final_result
+
+
+def distance(x, y):
+    return math.fabs(x - y)
+
+
+def normalize(x, y, width, height):
+    return float(x)/width, float(y)/height
+
+
+def get_most_centered(results, width, height):
+
+    distances = []
+    for res in results:
+        x, y = res["centroid"]
+        nx, ny = normalize(x, y, width, height)
+        distances.append([distance(nx, ny), (x, y), (nx, ny)])
+    return sorted(distances, key=lambda a: -a[0])
 
 if __name__ == "__main__":
     import sys
     #read the image
     image = cv2.imread(sys.argv[1])
+    height, width, channels = image.shape
+    print "dimensions", width, height
     #detect red obejcts!!
     result = find_red_objects(image)
+    # print get_most_centered(result, width, height)
+
     #write the new image
     # cv2.imwrite(sys.argv[2], result)
 
