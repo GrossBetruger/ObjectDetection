@@ -38,6 +38,13 @@ if __name__ == "__main__":
     # Create images with random rectangles and bounding boxes.
 
     target_bbox = (34, 32, 15, 7)
+    target_bboxes = {
+                     "hot_starts/9731914136151-1173170842.jpg": (36, 27, 13, 6),
+                     "hot_starts/9882853176151-1150256601.jpg": (34, 29, 15, 6),
+                     "hot_starts/9942924136151-1238413273.jpg": (37, 28, 12, 5),
+                     "hot_starts/9572785264151-149356314.jpg": (34, 32, 15, 7)
+                     }
+
     num_imgs = 500
 
     img_size = 10**2
@@ -46,13 +53,23 @@ if __name__ == "__main__":
     num_objects = 1
 
     bboxes = np.zeros((num_imgs, num_objects, 4))
-    # for b in bboxes:
-    #     print b[2]
-    # quit()
+
     imgs = np.zeros((num_imgs, img_size, img_size))  # set background to 0
 
     training_set_path = "hot_starts"
     paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
+    for path in paths:
+        vec = vectorize_img(path, img_size, img_size)
+        print path, vec
+        plt.imshow(vec)
+        pred_bbox = target_bboxes.get(path, target_bbox)
+        print "BOX", pred_bbox
+        plt.gca().add_patch(
+            matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
+                                         fc='none'))
+        plt.show()
+
+    quit()
     hots = [vectorize_img(p, img_size, img_size) for p in paths]
     hot = vectorize_img("hot_starts/9731914136151-1173170842.jpg", img_size, img_size)
     print hots
