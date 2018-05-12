@@ -93,17 +93,17 @@ if __name__ == "__main__":
     training_set_path = "hot_starts"
     paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
 
-    debug_targets(paths, targets)
+    # debug_targets(paths, targets)
 
     hots = [vectorize_img(p, img_size, img_size) for p in paths]
-    uniques = len(hots) - 1
+    uniques = len(hots)
     hot = vectorize_img("hot_starts/9731914136151-1173170842.jpg", img_size, img_size)
     print hots
     imgs = np.array(hots * (num_imgs / len(hots)))
 
     for i_img in range(num_imgs):
         for i_object in range(num_objects):
-            target =  targets[i_img % uniques]
+            target = targets[i_img % uniques]
             x, y, w, h = target
             # draw_bounding_box(imgs[i_img], target)
             bboxes[i_img, i_object] = [x, y, w, h]
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     "hot_starts/9572785264151-149356314.jpg",
     "hot_starts/9942924136151-1238413273.jpg"]
 
-    predict_one("hot_test/hot_test1.png", model, debug=True)
+    predict_one("hot_starts/hot_up.png", model, debug=True)
 
 
 
