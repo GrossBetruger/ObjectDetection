@@ -38,13 +38,14 @@ if __name__ == "__main__":
     # Create images with random rectangles and bounding boxes.
 
     target_bbox = (34, 32, 15, 7)
-    target_bboxes = {
-                     "hot_starts/9731914136151-1173170842.jpg": (36, 27, 13, 6),
-                     "hot_starts/9882853176151-1150256601.jpg": (34, 29, 15, 6),
-                     "hot_starts/9942924136151-1238413273.jpg": (37, 28, 12, 5),
-                     "hot_starts/9572785264151-149356314.jpg": (34, 32, 15, 7)
-                     }
+    target_bboxes = [
+        ("hot_starts/9731914136151-1173170842.jpg", (36, 27, 13, 6)),
+        ("hot_starts/9882853176151-1150256601.jpg", (34, 29, 15, 6)),
+        ("hot_starts/9572785264151-149356314.jpg", (34, 32, 15, 7)),
+        ("hot_starts/9942924136151-1238413273.jpg", (37, 28, 12,5))
+                    ]
 
+    targets = [x[1] for x in target_bboxes]
     num_imgs = 500
 
     img_size = 10**2
@@ -58,18 +59,18 @@ if __name__ == "__main__":
 
     training_set_path = "hot_starts"
     paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
-    for path in paths:
-        vec = vectorize_img(path, img_size, img_size)
-        print path, vec
-        plt.imshow(vec)
-        pred_bbox = target_bboxes.get(path, target_bbox)
-        print "BOX", pred_bbox
-        plt.gca().add_patch(
-            matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
-                                         fc='none'))
-        plt.show()
 
-    quit()
+    # for path in paths:
+    #     vec = vectorize_img(path, img_size, img_size)
+    #     print path, vec
+    #     plt.imshow(vec)
+    #     pred_bbox = target_bboxes.get(path, target_bbox)
+    #     print "BOX", pred_bbox
+    #     plt.gca().add_patch(
+    #         matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
+    #                                      fc='none'))
+    #     plt.show()
+
     hots = [vectorize_img(p, img_size, img_size) for p in paths]
     hot = vectorize_img("hot_starts/9731914136151-1173170842.jpg", img_size, img_size)
     print hots
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 
     for i_img in range(num_imgs):
         for i_object in range(num_objects):
-            x, y, w, h = target_bbox
+            x, y, w, h = targets[i_img % 4]
             # imgs[i_img, x:x + w, y:y + h] = 1.  # set rectangle to 1
             bboxes[i_img, i_object] = [x, y, w, h]
 
@@ -153,12 +154,19 @@ if __name__ == "__main__":
     mean_IOU = summed_IOU / len(pred_bboxes)
     mean_IOU
     print test_X[0]
-    hot = cv2.imread("hot_starts/9731914136151-1173170842.jpg")
-    hot_grey = cv2.cvtColor(hot, cv2.COLOR_RGB2GRAY )
-    # print hot_grey.shape
-    # quit()
-    hot_norm = cv2.resize(hot_grey, (img_size, img_size))
-    hots = np.array(np.array([hot_norm]))
+    ("hot_starts/9731914136151-1173170842.jpg", (36, 27, 13, 6)),
+    ("hot_starts/9882853176151-1150256601.jpg", (34, 29, 15, 6)),
+    ("hot_starts/9572785264151-149356314.jpg", (34, 32, 15, 7)),
+    ("hot_starts/9942924136151-1238413273.jpg", (37, 28, 12, 5))
+
+    # hot = cv2.imread("hot_starts/9731914136151-1173170842.jpg")
+    # # hot = cv2.imread("hot_starts/9572785264151-149356314.jpg")
+    # hot_grey = cv2.cvtColor(hot, cv2.COLOR_RGB2GRAY )
+    # # print hot_grey.shape
+    # # quit()
+    # hot_norm = cv2.resize(hot_grey, (img_size, img_size))
+    hot = vectorize_img("hot_starts/9942924136151-1238413273.jpg", img_size, img_size)
+    hots = np.array(np.array([hot]))
     inpt = (hots.reshape(len(hots), -1) - np.mean(hots)) / np.std(hots)
 
     pred_bbox = model.predict([inpt])[0]
