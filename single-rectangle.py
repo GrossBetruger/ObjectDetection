@@ -55,7 +55,8 @@ if __name__ == "__main__":
     paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
     hots = [vectorize_img(p, img_size, img_size) for p in paths]
     hot = vectorize_img("hot_starts/9731914136151-1173170842.jpg", img_size, img_size)
-    imgs = np.array([hot] * num_imgs)
+    print hots
+    imgs = np.array(hots * (num_imgs / len(hots)))
 
     for i_img in range(num_imgs):
         for i_object in range(num_objects):
