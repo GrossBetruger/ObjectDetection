@@ -7,7 +7,7 @@ import matplotlib
 import os
 
 
-NB_EPOCH = 1
+NB_EPOCH = 20
 
 
 def IOU(bbox1, bbox2):
@@ -41,16 +41,41 @@ def draw_bounding_box(img, pred_bbox):
                                      fc='none'))
     plt.show()
 
-if __name__ == "__main__":
-    # quit()
-    # Create images with random rectangles and bounding boxes.
 
+def predict_one(path, model, debug=False):
+    if debug:
+        img = cv2.imread(path)
+        print "original shape", img.shape
+    hot = vectorize_img(path, img_size, img_size)
+    hots = np.array(np.array([hot]))
+    inpt = (hots.reshape(len(hots), -1) - np.mean(hots)) / np.std(hots)
+
+    pred_bbox = model.predict([inpt])[0]
+    print "pred", pred_bbox
+    plt.close()
+    plt.imshow(hots[0])
+
+    plt.gca().add_patch(
+        matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
+                                     fc='none'))
+    plt.show()
+
+
+def debug_targets(paths, targets):
+    for i, p in enumerate(paths):
+        vec = vectorize_img(p, img_size, img_size)
+        print p
+        draw_bounding_box(vec, targets[i])
+
+
+if __name__ == "__main__":
     target_bbox = (34, 32, 15, 7)
     target_bboxes = [
         ("hot_starts/9731914136151-1173170842.jpg", (36, 27, 13, 6)),
         ("hot_starts/9882853176151-1150256601.jpg", (34, 29, 15, 6)),
         ("hot_starts/9572785264151-149356314.jpg", (34, 32, 15, 7)),
-        ("hot_starts/9942924136151-1238413273.jpg", (37, 28, 12,5))
+        ("hot_starts/hot_up.png", (39, 2, 11, 4)),
+        ("hot_starts/9942924136151-1238413273.jpg", (37, 28, 12,5)),
                     ]
 
     targets = [x[1] for x in target_bboxes]
@@ -68,26 +93,19 @@ if __name__ == "__main__":
     training_set_path = "hot_starts"
     paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
 
-    # for path in paths:
-    #     vec = vectorize_img(path, img_size, img_size)
-    #     print path, vec
-    #     plt.imshow(vec)
-    #     pred_bbox = target_bboxes.get(path, target_bbox)
-    #     print "BOX", pred_bbox
-    #     plt.gca().add_patch(
-    #         matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
-    #                                      fc='none'))
-    #     plt.show()
+    debug_targets(paths, targets)
 
     hots = [vectorize_img(p, img_size, img_size) for p in paths]
+    uniques = len(hots) - 1
     hot = vectorize_img("hot_starts/9731914136151-1173170842.jpg", img_size, img_size)
     print hots
     imgs = np.array(hots * (num_imgs / len(hots)))
 
     for i_img in range(num_imgs):
         for i_object in range(num_objects):
-            x, y, w, h = targets[i_img % 4]
-            draw_bounding_box(imgs[i_img], targets[i_img % 4])
+            target =  targets[i_img % uniques]
+            x, y, w, h = target
+            # draw_bounding_box(imgs[i_img], target)
             bboxes[i_img, i_object] = [x, y, w, h]
 
     imgs.shape, bboxes.shape
@@ -124,7 +142,7 @@ if __name__ == "__main__":
 
     print "building model..."
     model = Sequential([
-        Dense(200, input_dim=X.shape[-1]),
+        Dense(50, input_dim=X.shape[-1]),
         Activation('relu'),
         Dropout(0.2),
         Dense(y.shape[-1])
@@ -162,34 +180,14 @@ if __name__ == "__main__":
     mean_IOU = summed_IOU / len(pred_bboxes)
     mean_IOU
     print test_X[0]
-    ("hot_starts/9731914136151-1173170842.jpg", (36, 27, 13, 6)),
-    ("hot_starts/9882853176151-1150256601.jpg", (34, 29, 15, 6)),
-    ("hot_starts/9572785264151-149356314.jpg", (34, 32, 15, 7)),
-    ("hot_starts/9942924136151-1238413273.jpg", (37, 28, 12, 5))
 
-    # hot = cv2.imread("hot_starts/9731914136151-1173170842.jpg")
-    # # hot = cv2.imread("hot_starts/9572785264151-149356314.jpg")
-    # hot_grey = cv2.cvtColor(hot, cv2.COLOR_RGB2GRAY )
-    # # print hot_grey.shape
-    # # quit()
-    # hot_norm = cv2.resize(hot_grey, (img_size, img_size))
-    hot = vectorize_img("hot_starts/9942924136151-1238413273.jpg", img_size, img_size)
-    hots = np.array(np.array([hot]))
-    inpt = (hots.reshape(len(hots), -1) - np.mean(hots)) / np.std(hots)
 
-    pred_bbox = model.predict([inpt])[0]
-    print "pred", pred_bbox
-    plt.close()
-    plt.imshow(hots[0])
+    paths = ["hot_starts/9731914136151-1173170842.jpg"
+    "hot_starts/9882853176151-1150256601.jpg",
+    "hot_starts/9572785264151-149356314.jpg",
+    "hot_starts/9942924136151-1238413273.jpg"]
 
-    plt.gca().add_patch(
-        matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
-                                     fc='none'))
+    predict_one("hot_test/hot_test1.png", model, debug=True)
 
-    # plt.gca().add_patch(
-    #     matplotlib.patches.Rectangle((34, 32), 15, 7, ec='r',
-    #                                  fc='none'))
-
-    plt.show()
 
 
