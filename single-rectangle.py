@@ -7,7 +7,7 @@ import matplotlib
 import os
 
 
-NB_EPOCH = 20
+NB_EPOCH = 200
 
 
 def IOU(bbox1, bbox2):
@@ -56,7 +56,7 @@ def predict_one(path, model, debug=False):
     plt.imshow(hots[0])
 
     plt.gca().add_patch(
-        matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
+        matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2] * 2, pred_bbox[3], ec='r',
                                      fc='none'))
     plt.show()
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     imgs = np.zeros((num_imgs, img_size, img_size))  # set background to 0
 
     training_set_path = "hot_starts"
-    paths = [os.path.join(training_set_path, img_path) for img_path in os.listdir(training_set_path)]
+    paths = [x[0] for x in target_bboxes]
 
     # debug_targets(paths, targets)
 
@@ -107,15 +107,6 @@ if __name__ == "__main__":
             x, y, w, h = target
             # draw_bounding_box(imgs[i_img], target)
             bboxes[i_img, i_object] = [x, y, w, h]
-
-    imgs.shape, bboxes.shape
-
-    # In[5]:
-
-    i = 0
-    plt.imshow(imgs[i].T, cmap='Greys', interpolation='none', origin='lower', extent=[0, img_size, 0, img_size])
-    for bbox in bboxes[i]:
-        plt.gca().add_patch(matplotlib.patches.Rectangle((bbox[0], bbox[1]), bbox[2], bbox[3], ec='r', fc='none'))
 
     # Reshape and normalize the image data to mean 0 and std 1.
     X = (imgs.reshape(num_imgs, -1) - np.mean(imgs)) / np.std(imgs)
@@ -158,22 +149,6 @@ if __name__ == "__main__":
     pred_bboxes = pred_bboxes.reshape(len(pred_bboxes), num_objects, -1)
     pred_bboxes.shape
 
-    # Show a few images and predicted bounding boxes from the test dataset.
-    plt.figure(figsize=(12, 3))
-    for i_subplot in range(1, 5):
-        plt.subplot(1, 4, i_subplot)
-        i = np.random.randint(len(test_imgs))
-        plt.imshow(test_imgs[i].T, cmap='Greys', interpolation='none', origin='lower',
-                   extent=[0, img_size, 0, img_size])
-        for pred_bbox, exp_bbox in zip(pred_bboxes[i], test_bboxes[i]):
-            print pred_bbox
-            plt.gca().add_patch(
-                matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
-                                             fc='none'))
-            plt.annotate('IOU: {:.2f}'.format(IOU(pred_bbox, exp_bbox)),
-                         (pred_bbox[0], pred_bbox[1] + pred_bbox[3] + 0.2), color='r')
-
-    # Calculate the mean IOU (overlap) between the predicted and expected bounding boxes on the test dataset.
     summed_IOU = 0.
     for pred_bbox, test_bbox in zip(pred_bboxes.reshape(-1, 4), test_bboxes.reshape(-1, 4)):
         summed_IOU += IOU(pred_bbox, test_bbox)
@@ -187,7 +162,7 @@ if __name__ == "__main__":
     "hot_starts/9572785264151-149356314.jpg",
     "hot_starts/9942924136151-1238413273.jpg"]
 
-    predict_one("hot_starts/hot_up.png", model, debug=True)
+    predict_one("hot_starts/9942924136151-1238413273.jpg", model, debug=True)
 
 
 
