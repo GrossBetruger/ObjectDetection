@@ -33,6 +33,14 @@ def vectorize_img(img_path, img_xsize, img_ysize):
     return img_norm
 
 
+def draw_bounding_box(img, pred_bbox):
+    plt.imshow(img)
+    print "BOX", pred_bbox
+    plt.gca().add_patch(
+        matplotlib.patches.Rectangle((pred_bbox[0], pred_bbox[1]), pred_bbox[2], pred_bbox[3], ec='r',
+                                     fc='none'))
+    plt.show()
+
 if __name__ == "__main__":
     # quit()
     # Create images with random rectangles and bounding boxes.
@@ -79,7 +87,7 @@ if __name__ == "__main__":
     for i_img in range(num_imgs):
         for i_object in range(num_objects):
             x, y, w, h = targets[i_img % 4]
-            # imgs[i_img, x:x + w, y:y + h] = 1.  # set rectangle to 1
+            draw_bounding_box(imgs[i_img], targets[i_img % 4])
             bboxes[i_img, i_object] = [x, y, w, h]
 
     imgs.shape, bboxes.shape
